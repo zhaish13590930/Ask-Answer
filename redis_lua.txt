@@ -2,3 +2,11 @@
             final String luaScript = "local v=redis.call('hget',KEYS[1],ARGV[1]);local r=1;if(v) then r=tonumber(v) if(r>65534) then r=1  else r=r+1 end; else r=1  end ; redis.call('hset',KEYS[1],ARGV[1],r) ; return tostring(r);";
             String resultStr  = (String) jedis.eval(luaScript,1,key,tboxcode);
             物联网设备流水号生成
+            
+            
+              final String SCRIPT  = "local t1 =  redis.call('zrangebyscore',KEYS[1],ARGV[1],ARGV[2]);redis.call('zrem',KEYS[1],table.concat(t1,' ')) ;return t1;";
+        StringRedisTemplate template =RedisTemplateHolder.getRedisTemplateMapByDbIndex(param.getDbIndex());
+        DefaultRedisScript<List> redisScript = new DefaultRedisScript<>(SCRIPT,List.class);
+        List re = template.execute(redisScript,Collections.singletonList(param.getKey()),String.valueOf(param.getScoreMin()),String.valueOf(param.getScoreMax()));
+        String str = JSON.toJSONString(re);
+        zset范围删除,并返回删除的内容记录
